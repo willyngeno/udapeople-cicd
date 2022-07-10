@@ -115,8 +115,8 @@ jobs:
              npm test
              npm audit fix --force  --audit-level=critical
              npm audit --audit-level=critical
-             
-  scan-frontend:
+
+  scan-backend:
     docker:
       - image: cimg/node:13.8.0
     steps:
@@ -131,7 +131,8 @@ jobs:
              npm run build
              npm test
              npm audit fix --force  --audit-level=critical
-             npm audit --audit-level=critical
+             npm audit --audit-level=critical        
+  
 
 
   # #deploy-infrastructure:
