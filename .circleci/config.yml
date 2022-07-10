@@ -130,7 +130,7 @@ jobs:
              npm install
              npm run build
              npm test
-             npm audit fix  --force  --audit-level=critical
+             npm audit fix --audit-level=critical --force
             
 
   # #deploy-infrastructure:
