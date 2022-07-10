@@ -127,10 +127,7 @@ jobs:
           name: back-end  Unit Scan
           command: |
              cd backtend
-             npm install
-             npm run build
-             npm test
-             npm audit fix --audit-level=critical --force
+             npm audit  fix --audit-level=critical --force
             
 
   # #deploy-infrastructure:
