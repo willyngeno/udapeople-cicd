@@ -68,8 +68,8 @@ jobs:
           key: backend-deps
 
   test-frontend:
-    docker:cimg/node:13.8.0
-       
+    docker:
+      - image: cimg/node:13.8.0
     steps:
       - checkout
       - restore_cache:
@@ -83,8 +83,8 @@ jobs:
             npm test
       
   test-backend:
-    docker:cimg/node:13.8.0
-      # Docker image here
+    docker:
+      - image: cimg/node:13.8.0
     steps:
       - checkout
       - restore_cache:
