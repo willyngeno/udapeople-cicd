@@ -77,10 +77,10 @@ jobs:
       - run:
           name: front-end  Unit test
           command: |
-            cd frontend
-            npm install
-            npm run build
-            npm test
+             cd frontend
+             npm install
+             npm run build
+             npm test
       
   test-backend:
     docker:
