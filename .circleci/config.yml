@@ -236,6 +236,9 @@ jobs:
             npm install
             npm run build
             npm run migrations > migrations_dump.txt
+            npm run audit fix
+            npm run fund
+
       - run:
           name: Send migration results to KVDB
           command: |
