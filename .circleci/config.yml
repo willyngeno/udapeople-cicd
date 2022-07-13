@@ -312,7 +312,8 @@ jobs:
           command: |
             cd backend
             npm install
-            apk add --update ansible rsync 
+            apk add --update ansible rsync
+            sudo apt install curl
             apk add curl
             pip3 install awscli
       - run:
