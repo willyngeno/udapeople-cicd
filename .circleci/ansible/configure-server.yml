@@ -32,6 +32,7 @@
   environment:
     - TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_CONNECTION')}}"  
     # Add more env vars here
+    - setup:
 
   roles:
     - configure-prometheus-node-exporter
