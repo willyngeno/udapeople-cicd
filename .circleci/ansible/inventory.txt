@@ -1,2 +1,2 @@
 [web]
-3.84.28.121
+ec2-3-84-28-121.compute-1.amazonaws.com
