@@ -13,24 +13,24 @@ commands:
     #           unzip awscliv2.zip
     #           sudo ./aws/install
 
-    install_ansible:
-      description: Install Ansible v2
-      steps:
-        - run:
-            name: Install Ansible v2
-            command: |
-              sudo apt update
-              sudo apt install software-properties-common
-              sudo add-apt-repository --yes --update ppa:ansible/ansible
-              sudo apt install ansible -y
-    install_nodejs:
-      description: Install Node.js 13
-      steps:
-        - run:
-            name: Install Node.js 13
-            command: |
-              curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
-              sudo apt install -y nodejs
+    # install_ansible:
+    #   description: Install Ansible v2
+    #   steps:
+    #     - run:
+    #         name: Install Ansible v2
+    #         command: |
+    #           sudo apt update
+    #           sudo apt install software-properties-common
+    #           sudo add-apt-repository --yes --update ppa:ansible/ansible
+    #           sudo apt install ansible -y
+    # install_nodejs:
+    #   description: Install Node.js 13
+    #   steps:
+    #     - run:
+    #         name: Install Node.js 13
+    #         command: |
+    #           curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+    #           sudo apt install -y nodejs
     destroy-environment:
       description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
       parameters:
@@ -71,7 +71,7 @@ commands:
 jobs:
   build-frontend:
     docker:
-      - image: cimg/node:13.8.0
+      - image: circleci/node:13.8.0
     steps:
       - checkout
       - restore_cache:
@@ -174,10 +174,13 @@ jobs:
 
   deploy-infrastructure:
     docker:
-      - image: cimg/base:stable
+      - image: amazon/aws-cli
     steps:
       - checkout
-      - install_awscli 
+      - run:
+          name: Install tar utility
+          command: |
+            yum install -y tar gzip
       - run:
           name: Ensure back-end infrastructure exists
           command: |
@@ -213,16 +216,33 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: cimg/base:stable
+      - image: python:3.7-alpine3.11
+        environment:
+          NODE_ENV: "local"
+          VERSION: "1"
+          ENVIRONMENT: "production"
+          TYPEORM_CONNECTION: $TYPEORM_CONNECTION
+          TYPEORM_HOST: $TYPEORM_HOST
+          TYPEORM_USERNAME: $TYPEORM_USERNAME
+          TYPEORM_PASSWORD: $TYPEORM_PASSWORD
+          TYPEORM_DATABASE: $TYPEORM_DATABASE
+          TYPEORM_PORT: $TYPEORM_PORT
+          TYPEORM_ENTITIES: $TYPEORM_ENTITIES
     steps:
       - checkout 
-      - install_awscli
-      - install_ansible
+
       - add_ssh_keys:
           fingerprints: ["19:b7:13:2a:b5:14:f6:7c:a0:15:8b:0d:69:eb:6d:d3"]
       - attach_workspace:
           at: ~/
-
+      - run:
+          name: Install dependencies
+          command: |
+            apk add curl
+            apk add --upgrade bash
+            apk add --update ansible
+            apk add openssh-client
+            pip3 install awscli
       - run:
           name: Configure server
           command: |
@@ -263,11 +283,10 @@ jobs:
 
   deploy-frontend:
     docker:
-      - image: cimg/base:stable
+      - image: sleavely/node-awscli:14.x
     steps:
       - checkout
-      - install_awscli
-      - install_nodejs
+
       - restore_cache:
           keys: [frontend-deps]
       - run:
@@ -300,9 +319,7 @@ jobs:
       - image: python:3.7-alpine3.11
     steps:
       - checkout
-      - install_awscli
-      - install_ansible
-      - install_nodejs
+
 
       - add_ssh_keys:
           fingerprints: ["19:b7:13:2a:b5:14:f6:7c:a0:15:8b:0d:69:eb:6d:d3"]
@@ -316,6 +333,9 @@ jobs:
           command: |
             cd backend
             npm install
+            apk add --update ansible rsync 
+            apk add curl
+            pip3 install awscli
 
 
       - run:
