@@ -232,7 +232,7 @@ jobs:
       
   run-migrations:
     docker:
-      - image: cimg/base:stable
+      - image: sleavely/node-awscli:14.x
     steps:
       - checkout
 
