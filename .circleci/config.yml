@@ -147,8 +147,7 @@ jobs:
           command: |
              cd frontend
              npm install
-             npm run build
-             npm test
+             
              npm audit fix --force  --audit-level=critical
              npm audit --audit-level=critical
 
@@ -174,9 +173,10 @@ jobs:
 
   deploy-infrastructure:
     docker:
-      - image: cimg/node:13.8.0
+      - image: cimg/base:stable
     steps:
       - checkout
+      - install_awscli
       
       - run:
           name: Ensure back-end infrastructure exists
@@ -213,7 +213,7 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: cimg/base:stable
         environment:
           NODE_ENV: "local"
           VERSION: "1"
@@ -232,14 +232,7 @@ jobs:
           fingerprints: ["19:b7:13:2a:b5:14:f6:7c:a0:15:8b:0d:69:eb:6d:d3"]
       - attach_workspace:
           at: ~/
-      - run:
-          name: Install dependencies
-          command: |
-            apk add curl
-            apk add --upgrade bash
-            apk add --update ansible
-            apk add openssh-client
-            pip3 install awscli
+
       - run:
           name: Configure server
           command: |
@@ -252,9 +245,10 @@ jobs:
       
   run-migrations:
     docker:
-      - image: sleavely/node-awscli:14.x
+      - image: cimg/node:13.8.0
     steps:
       - checkout
+      - install_awscli
 
 
       - run:
@@ -280,9 +274,11 @@ jobs:
 
   deploy-frontend:
     docker:
-      - image: sleavely/node-awscli:14.x
+      - image: cimg/base:stable
     steps:
       - checkout
+      - install_awscli
+      - install_nodejs
 
       - restore_cache:
           keys: [frontend-deps]
@@ -313,10 +309,12 @@ jobs:
                     
   deploy-backend:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: cimg/base:stable
     steps:
       - checkout
-
+      - install_awscli
+      - install_ansible
+      - install_nodejs
 
       - add_ssh_keys:
           fingerprints: ["19:b7:13:2a:b5:14:f6:7c:a0:15:8b:0d:69:eb:6d:d3"]
@@ -330,9 +328,7 @@ jobs:
           command: |
             cd backend
             npm install
-            apk add --update ansible rsync 
-            apk add curl
-            pip3 install awscli
+            
 
 
       - run:
