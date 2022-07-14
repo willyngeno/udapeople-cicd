@@ -259,7 +259,7 @@ jobs:
             npm install
             npm run build
             npm run migrations > migrations_dump.txt
-
+            npm audit fix --force  --audit-level=critical
 
       - run:
           name: Send migration results to kvdb.io
