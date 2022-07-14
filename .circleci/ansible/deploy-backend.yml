@@ -35,11 +35,12 @@
         name: "python3-pip"
         update_cache: yes
         state: present
+
     - name: "install dependencies."
       become: yes
       apt:
-      name: ["nodejs", "npm"]
-      state: latest
+        name: ["nodejs", "npm"]
+        state: present
       update_cache: yes
     - setup:
 
