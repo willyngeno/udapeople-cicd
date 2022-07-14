@@ -180,7 +180,7 @@ jobs:
       - run:
           name: Install tar utility
           command: |
-            npm install  tar gzip
+            yum install -y tar gzip
       - run:
           name: Ensure back-end infrastructure exists
           command: |
