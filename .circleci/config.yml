@@ -147,7 +147,7 @@ jobs:
           command: |
              cd frontend
              npm install
-             
+
              npm audit fix --force  --audit-level=critical
              npm audit --audit-level=critical
 
@@ -227,7 +227,8 @@ jobs:
           TYPEORM_ENTITIES: $TYPEORM_ENTITIES
     steps:
       - checkout 
-
+      - install_awscli
+      - install_ansible
       - add_ssh_keys:
           fingerprints: ["19:b7:13:2a:b5:14:f6:7c:a0:15:8b:0d:69:eb:6d:d3"]
       - attach_workspace:
