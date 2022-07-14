@@ -361,6 +361,7 @@ jobs:
       - checkout
       - install_awscli
       - install_ansible
+      - install_nodejs
       - attach_workspace:
           at: ~/
       
