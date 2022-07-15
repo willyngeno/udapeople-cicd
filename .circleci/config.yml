@@ -346,6 +346,7 @@ jobs:
             --output text)
 
             export API_URL=http://${BACKEND_PUBLIC_IP}:3030
+            echo "${API_URL}"
             if curl -s $API_URL/api/status | grep "ok"
             then
               exit 0
@@ -364,8 +365,7 @@ jobs:
             fi      
       - destroy-environment:
           Workflow_ID: ${CIRCLE_WORKFLOW_ID:0:7}
-      - revert-migrations:
-          Workflow_ID: ${CIRCLE_WORKFLOW_ID:0:7}
+          
       - run:
           name: Package Backend
           command: |
