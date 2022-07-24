@@ -208,37 +208,26 @@ jobs:
          paths:
            - project/.circleci/ansible/inventory.txt
       - destroy-environment:
-          Workflow_ID: ${CIRCLE_WORKFLOW_ID:0:7}      
+          Workflow_ID: ${CIRCLE_WORKFLOW_ID:0:7}
 
   configure-infrastructure:
     docker:
       - image: cimg/base:stable
-        environment:
-          NODE_ENV: "production"
-          VERSION: "1"
-
-          TYPEORM_CONNECTION: $TYPEORM_CONNECTION
-          TYPEORM_HOST: $TYPEORM_HOST
-          TYPEORM_USERNAME: $TYPEORM_USERNAME
-          TYPEORM_PASSWORD: $TYPEORM_PASSWORD
-          TYPEORM_DATABASE: $TYPEORM_DATABASE
-          TYPEORM_PORT: $TYPEORM_PORT
-          TYPEORM_ENTITIES: $TYPEORM_ENTITIES
     steps:
-      - checkout 
+      - checkout
       - install_awscli
       - install_ansible
       - add_ssh_keys:
           fingerprints: ["df:d4:4e:a3:ae:cf:f3:fa:19:82:1d:62:3b:31:6f:f9"]
       - attach_workspace:
           at: ~/
-
       - run:
-          name: Configure server
+          name: Configure Server
           command: |
             cd .circleci/ansible
             cat inventory.txt
             ansible-playbook -i inventory.txt configure-server.yml
+
       # Here's where you will add some code to rollback on failure
       - destroy-environment:
           Workflow_ID: ${CIRCLE_WORKFLOW_ID:0:7}

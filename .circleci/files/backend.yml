@@ -21,9 +21,9 @@ Resources:
           FromPort: 3030
           ToPort: 3030
           CidrIp: 0.0.0.0/0
-      
         
-        
+
+
 
   EC2Instance:
     Type: AWS::EC2::Instance
@@ -31,9 +31,9 @@ Resources:
       InstanceType: t2.micro
       SecurityGroups:
         - Ref: InstanceSecurityGroup
-      KeyName: manu  
+      KeyName: udacity
       ImageId: ami-08d4ac5b634553e16 
       Tags:
         - Key: Name
           Value: !Sub backend-${ID}
-        
+
