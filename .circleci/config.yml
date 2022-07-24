@@ -210,27 +210,27 @@ jobs:
       - destroy-environment:
           Workflow_ID: ${CIRCLE_WORKFLOW_ID:0:7}
 
-  # configure-infrastructure:
-  #   docker:
-  #     - image: cimg/base:stable
-  #   steps:
-  #     - checkout
-  #     - install_awscli
-  #     - install_ansible
-  #     - add_ssh_keys:
-  #         fingerprints: ["df:d4:4e:a3:ae:cf:f3:fa:19:82:1d:62:3b:31:6f:f9"]
-  #     - attach_workspace:
-  #         at: ~/
-  #     - run:
-  #         name: Configure Server
-  #         command: |
-  #           cd .circleci/ansible
-  #           cat inventory.txt
-  #           ansible-playbook -i inventory.txt configure-server.yml
+  configure-infrastructure:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - install_awscli
+      - install_ansible
+      - add_ssh_keys:
+          fingerprints: ["56:e5:fd:eb:c8:5e:d6:25:68:70:10:17:ae:fe:21:05"]
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Configure Server
+          command: |
+            cd .circleci/ansible
+            cat inventory.txt
+            ansible-playbook -i inventory.txt configure-server.yml
 
       # Here's where you will add some code to rollback on failure
-#       - destroy-environment:
-#           Workflow_ID: ${CIRCLE_WORKFLOW_ID:0:7}
+      - destroy-environment:
+          Workflow_ID: ${CIRCLE_WORKFLOW_ID:0:7}
       
 #   run-migrations:
 #     docker:
@@ -448,8 +448,8 @@ workflows:
           filters:
             branches:
               only: [main]
-      # - configure-infrastructure:
-      #     requires: [deploy-infrastructure]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
       # - run-migrations:
       #     requires: [configure-infrastructure]
       # - deploy-frontend:
