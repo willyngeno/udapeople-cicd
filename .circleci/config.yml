@@ -234,10 +234,10 @@ jobs:
       
   run-migrations:
     docker:
-      - image: cimg/node:13.8.0
+      - image: sleavely/node-awscli:14.x
     steps:
       - checkout
-      - install_awscli
+      
       - run:
           name: Run migrations
           command: |
