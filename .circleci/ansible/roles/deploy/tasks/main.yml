@@ -1,19 +1,19 @@
 - name: Create app dir
   become: yes
   file:
-    path: /home/ubuntu/app
+    path: ~/backend-app
     state: directory
 
 - name: "Copy backend build folder to EC2"
   become: yes
   unarchive:
-    src: /root/project/artifact.tar.gz
-    dest: /home/ubuntu/app
+    src: artifact.tar.gz
+    dest: ~/backend-app
   
    
 - name: "list dirs"
   become: yes
-  command: "ls /home/ubuntu/app/"
+  command: "ls ~/backend-app "
   
 - name: "delete anything that might already be running"
   become: true
@@ -29,7 +29,7 @@
   shell: |
     pm2 start ./main.js
   args:
-      chdir: /home/ubuntu/app/dist
+      chdir:  ~/backend-app/dist
   environment:
     ENVIRONMENT: production
     TYPEORM_CONNECTION: postgres
