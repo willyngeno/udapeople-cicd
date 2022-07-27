@@ -277,19 +277,11 @@ jobs:
           Workflow_ID: ${CIRCLE_WORKFLOW_ID:0:7}
   deploy-frontend:
     docker:
-      - image: cimg/base:stable
+      - image: sleavely/node-awscli:14.x
     steps:
       - checkout
-      - install_awscli
-      - install_nodejs
-
-      - restore_cache:
-          keys: [frontend-deps]
-      - run:
-          name: Install dependencies
-          command: |
-            cd frontend
-            npm install
+      - attach_workspace:
+          at: /root
       - run:
           name: Get backend url
           command: |
@@ -330,15 +322,14 @@ jobs:
           TYPEORM_ENTITIES: $TYPEORM_ENTITIES
     steps:
       - checkout
-    
+
 
       - add_ssh_keys:
           fingerprints: ["56:e5:fd:eb:c8:5e:d6:25:68:70:10:17:ae:fe:21:05"]
       - attach_workspace:
           at: /root
-      - restore_cache:
-          keys: [backend-deps]
 
+          
       - run:
           name: Install dependencies
           command: |
