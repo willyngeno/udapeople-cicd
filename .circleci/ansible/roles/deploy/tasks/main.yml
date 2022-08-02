@@ -34,3 +34,13 @@
       global: yes
       production: yes
       state: present
+  - name: "extract artifact"
+    become: yes
+    unarchive:
+      src: files/artifact.tar.gz
+      dict: . 
+  - name: start app
+    become: yes
+    shell: |
+      pm2 delete all 
+      pm2 start npm -- start
