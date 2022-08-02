@@ -28,10 +28,10 @@
     - setup:
 
   environment:
-    NODE_ENV: "{{ lookup('env','NODE_ENV') }}"
+    NODE_ENV: production
     VERSION: "{{ lookup('env','VERSION') }}"
     TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_CONNECTION') }}"
-    ENVIRONMENT: "{{ lookup('env','ENVIRONMENT') }}" 
+    ENVIRONMENT: production
     TYPEORM_ENTITIES: "{{ lookup('env', 'TYPEORM_ENTITIES') }}"
    
     TYPEORM_HOST: "{{ lookup('env', 'TYPEORM_HOST') }}"
