@@ -38,7 +38,7 @@
     become: yes
     unarchive:
       src: files/artifact.tar.gz
-      dict: . 
+      dest: . 
   - name: start app
     become: yes
     shell: |
