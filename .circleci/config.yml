@@ -288,7 +288,7 @@ jobs:
       - install_awscli
       - install_nodejs
       - restore_cache:
-          keys: [frontend-deps]
+          keys: [frontend-build]
       - run:
           name: Install dependencies
           command: |
@@ -330,25 +330,16 @@ jobs:
 
       - add_ssh_keys:
           fingerprints: ["32:9f:55:cb:dd:1d:04:bb:94:72:da:d0:33:cd:ad:0e"]
-     
-      - restore_cache:
-          keys: [backend-deps]
-
       - attach_workspace:
           at: ~/
-      
-      - run:
-          name: Install dependencies
-          command: |
-            cd backend
-            npm install
+      - restore_cache:
+          keys: [backend-build]
       - run:
           name: Deploy Backend
           command: |
             cd backend
+            npm install
             npm run build
-            
-
             cd ..
             tar -C backend -czvf artifact.tar.gz .
             mkdir -p ~/project/.circleci/ansible/roles/deploy/files/
