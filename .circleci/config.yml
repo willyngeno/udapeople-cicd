@@ -222,19 +222,15 @@ jobs:
       - install_awscli
       - install_ansible
       - add_ssh_keys:
-          fingerprints: ["17:3a:13:7f:de:36:23:7c:81:01:eb:fd:63:bb:79:79"]
+          fingerprints: ["bd:0c:36:19:74:1b:58:5c:14:93:ac:73:cc:d0:4a:17"]
       - attach_workspace:
           at: ~/
       - run:
           name: Configure Server
           command: |
-          
+
             cd .circleci/ansible
-            ansible-playbook -i inventory.txt configure-server.yml
-      - persist_to_workspace:
-          root: ~/
-          paths: 
-            - project/backend
+            ansible-playbook -i inventory.txt configure-server.ymls
             
       # Here's where you will add some code to rollback on failure
       - destroy-environment:
@@ -309,7 +305,7 @@ jobs:
       - install_ansible
       - install_nodejs
       - add_ssh_keys:
-          fingerprints: ["17:3a:13:7f:de:36:23:7c:81:01:eb:fd:63:bb:79:79"]
+          fingerprints: ["bd:0c:36:19:74:1b:58:5c:14:93:ac:73:cc:d0:4a:17"]
       - attach_workspace:
           at: ~/
       - restore_cache:
