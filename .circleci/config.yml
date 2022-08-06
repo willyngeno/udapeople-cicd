@@ -223,7 +223,11 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update  --no-cache tar gzip ansible awscli
+            apk add curl
+            apk add --upgrade bash
+            apk add --update ansible
+            apk add openssh-client
+            pip3 install awscli
       - attach_workspace:
           at: ~/
       - run:
