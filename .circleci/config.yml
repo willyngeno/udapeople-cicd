@@ -214,13 +214,16 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image:  cimg/base:stable
+      - image:  python3.7-alpine3.16
     steps:
       - checkout
-      - install_awscli
-      - install_ansible
       - add_ssh_keys:
-          fingerprints: ["bd:0c:36:19:74:1b:58:5c:14:93:ac:73:cc:d0:4a:17"]
+          fingerprints: 
+            - "bd:0c:36:19:74:1b:58:5c:14:93:ac:73:cc:d0:4a:17"
+      - run:
+          name: Install dependencies
+          command: |
+            apt add --update  --no-cache tar gzip ansible awscli
       - attach_workspace:
           at: ~/
       - run:
@@ -431,7 +434,7 @@ workflows:
       # - scan-frontend:
       #     requires: [build-frontend]
       - deploy-infrastructure:
-            require: [build-frontend,build-backend]
+            require: [build-frontend, build-backend]
       #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
       #     filters:
       #       branches:
