@@ -35,7 +35,8 @@
         name: "python3-pip"
         state: present
         update_cache: yes
-    
+        
+    - setup:
 
   roles:
     - configure-prometheus-node-exporter
