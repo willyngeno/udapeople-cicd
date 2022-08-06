@@ -1,5 +1,5 @@
 ---
-  - name: "update apt packages."
+  - name: "update and upgrade packages."
     become: yes
     apt:
       upgrade: yes
@@ -34,5 +34,5 @@
       name: pm2
       global: yes
       production: yes
-      state: present
+      state: latest
       
