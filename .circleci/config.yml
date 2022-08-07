@@ -257,12 +257,7 @@ jobs:
       - image: python:3.7-alpine3.11
     steps:
       - checkout
-      - run:
-          name: Install dependencies
-          command: |
-            apk add curl  --update --no-cache tar gzip nodejs npm awscli curl
-      - restore_cache:
-          keys: [backend-build]
+      
       - run:
           name: Run migrations
           command: |
