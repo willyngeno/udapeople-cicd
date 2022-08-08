@@ -331,7 +331,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update ansible rsync 
+            apk add --update ansible 
             apk add curl
             pip3 install awscli
       - run:
