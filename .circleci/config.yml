@@ -283,13 +283,10 @@ jobs:
       - run:
           name: Install dependencies
           command: |
+            apk add --update ansible rsync 
             apk add curl
-            apk add --upgrade bash
-            apk add openssh-client
-            apk add nodejs
             pip3 install awscli
-      - restore_cache:
-          keys: [frontend-build]
+      
       - run:
           name: Get backend url
           command: |
@@ -302,13 +299,15 @@ jobs:
 
             echo "API_URL=http://${BACKEND_PUBLIC_IP}:3030" >> frontend/.env
             cat frontend/.env
-            export API_URL = "http://${BACKEND_PUBLIC_IP}:3030"
-            echo "API_URL = ${API_URL}"
+           
+      - restore_cache:
+          keys: [frontend-build]
       - run:
           name: Deploy frontend objects
           command: |
             cd frontend
             npm install
+            npm audit fix --force  --audit-level=critical
             npm run build
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
@@ -321,13 +320,20 @@ jobs:
                     
   deploy-backend:
     docker:
-      - image: cimg/base:stable
-
+      - image: python:3.7-alpine3.11
+        environment:
+          NODE_ENV: "local"
+          VERSION: "1"
+          ENVIRONMENT: "production"
+          TYPEORM_CONNECTION: $TYPEORM_CONNECTION
+          TYPEORM_HOST: $TYPEORM_HOST
+          TYPEORM_USERNAME: $TYPEORM_USERNAME
+          TYPEORM_PASSWORD: $TYPEORM_PASSWORD
+          TYPEORM_DATABASE: $TYPEORM_DATABASE
+          TYPEORM_PORT: $TYPEORM_PORT
+          TYPEORM_ENTITIES: $TYPEORM_ENTITIES
     steps:
       - checkout
-      - install_awscli
-      - install_ansible
-      - install_nodejs
       - add_ssh_keys:
           fingerprints: ["bd:0c:36:19:74:1b:58:5c:14:93:ac:73:cc:d0:4a:17"]
       - attach_workspace:
@@ -337,12 +343,14 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            cd backend
-            npm install
+            apk add --update ansible rsync 
+            apk add curl
+            pip3 install awscli
       - run:
           name: Deploy Backend
           command: |
             cd backend
+            npm install
             npm run build
             cd ..
             tar -C backend -czvf artifact.tar.gz .
@@ -466,10 +474,10 @@ workflows:
           requires: [deploy-infrastructure]
       - run-migrations:
           requires: [configure-infrastructure]
-      # - deploy-frontend:
-      #     requires: [run-migrations]
-      # - deploy-backend:
-      #     requires: [run-migrations]
+      - deploy-frontend:
+          requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations]
       # - smoke-test:
       #     requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
