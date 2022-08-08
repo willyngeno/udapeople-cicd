@@ -282,14 +282,6 @@ jobs:
       - checkout
       - install_awscli
       - install_nodejs
-      - run:
-          name: Install dependencies
-          command: |
-            apk add curl
-            apk add --upgrade bash
-            apk add --update ansible
-            apk add openssh-client
-            pip3 install awscli
             
       - run:
           name: Get backend url
