@@ -293,8 +293,6 @@ jobs:
             echo "API_URL=http://${BACKEND_PUBLIC_IP}:3030" >> frontend/.env
             cat frontend/.env
            
-      - restore_cache:
-          keys: [frontend-build]
       - run:
           name: Deploy frontend objects
           working_directory: ./frontend
