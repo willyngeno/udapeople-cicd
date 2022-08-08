@@ -288,6 +288,7 @@ jobs:
             apk add --update ansible
             apk add openssh-client
             pip3 install awscli
+            pip3 install nodejs
       - run:
           name: Get backend url
           command: |
