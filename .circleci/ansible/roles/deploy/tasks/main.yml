@@ -7,9 +7,8 @@
 - name: "Copy backend build folder to EC2"
   become: yes
   unarchive:
-    src: /root/project/artifact.tar.gz
-    dest: /home/ubuntu/app
-  
+    src: docker-compose.yml
+    dest: /tmp/docker_registry
    
 - name: "list dirs"
   become: yes
