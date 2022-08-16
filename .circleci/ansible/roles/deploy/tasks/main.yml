@@ -7,8 +7,8 @@
 - name: "Copy backend build folder to EC2"
   become: yes
   unarchive:
-    src: /root/project/backend/node_modules
-    dest: ~/backend-app
+    src: project/backend/node_modules
+    dest: ~/udapeople
 
    
 - name: "list dirs"
