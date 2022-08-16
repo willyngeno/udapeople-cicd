@@ -7,8 +7,9 @@
 - name: "Copy backend build folder to EC2"
   become: yes
   unarchive:
-    src: docker-compose.yml
-    dest: /tmp/docker_registry
+    src: /root/project/backend/node_modules
+    dest: ~/backend-app
+
    
 - name: "list dirs"
   become: yes
