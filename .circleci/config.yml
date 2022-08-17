@@ -325,7 +325,7 @@ jobs:
       - add_ssh_keys:
           fingerprints: ["bd:0c:36:19:74:1b:58:5c:14:93:ac:73:cc:d0:4a:17"]
       - attach_workspace:
-          at: ./
+          at: ~/
       - run:
           name: Install dependencies
           command: |
@@ -343,7 +343,7 @@ jobs:
             cd .circleci/ansible
             echo "content of the inventory.txt file is ----------"
             cat inventory.txt
-            ansible-playbook -i inventory.txt deploy-backend.yml -vvv
+            ansible-playbook -i inventory.txt deploy-backend.yml 
 
 
       - destroy-environment:
