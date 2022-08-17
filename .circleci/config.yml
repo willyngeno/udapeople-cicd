@@ -314,6 +314,8 @@ jobs:
       # Here's where you will add some code to rollback on failure      
                     
   deploy-backend:
+    environment:
+      - ANSIBLE_HOST_KEY_CHECKING: False
     docker:
       - image: python:3.7-alpine3.11
         
@@ -323,9 +325,7 @@ jobs:
       - add_ssh_keys:
           fingerprints: ["bd:0c:36:19:74:1b:58:5c:14:93:ac:73:cc:d0:4a:17"]
       - attach_workspace:
-          at: ~/
-      - restore_cache:
-          keys: [backend-build]
+          at: ./
       - run:
           name: Install dependencies
           command: |
@@ -341,8 +341,9 @@ jobs:
             mkdir -p ~/project/.circleci/ansible/roles/deploy/files/
             mv artifact.tar.gz .circleci/ansible/roles/deploy/files/
             cd .circleci/ansible
-            echo "content of the inventory.txt file is ----------$(cat inventory.txt)"
-            ansible-playbook -i inventory.txt deploy-backend.yml
+            echo "content of the inventory.txt file is ----------"
+            cat inventory.txt
+            ansible-playbook -i inventory.txt deploy-backend.yml -vvv
 
 
       - destroy-environment:
