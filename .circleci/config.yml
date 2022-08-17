@@ -326,10 +326,13 @@ jobs:
           fingerprints: ["bd:0c:36:19:74:1b:58:5c:14:93:ac:73:cc:d0:4a:17"]
       - attach_workspace:
           at: ~/
+      - restore_cache:
+          keys: [backend-deps]
       - run:
           name: Install dependencies
           command: |
-             apk add --update ansible nodejs npm openssh tar gzip
+            cd backend
+            npm install
       - run:
           name: Deploy Backend
           command: |
