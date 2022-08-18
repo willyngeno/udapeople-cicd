@@ -197,54 +197,46 @@ jobs:
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
-              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+            aws ec2 describe-instances \
+              --filters "Name=tag:Name,Values=UdaPeople-backend-${CIRCLE_WORKFLOW_ID:0:5}" \
+                'Name=instance-state-name,Values=running' \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --output text)
-            echo $BACKEND_PUBLIC_IP >> .circleci/ansible/inventory.txt
-            cat .circleci/ansible/inventory.txt
+              --output text >> .circleci/ansible/inventory.txt
       - persist_to_workspace:
-          root: ~/
+          root: ./
           paths:
-            - project/.circleci/ansible/inventory.txt
+            - ./.circleci/ansible/inventory.txt
       - destroy-environment:
           Workflow_ID: ${CIRCLE_WORKFLOW_ID:0:5}
 
   configure-infrastructure:
+    environment:
+      - ANSIBLE_HOST_KEY_CHECKING: False
     docker:
       - image: python:3.7-alpine3.11
-        environment:
-          NODE_ENV: "local"
-          VERSION: "1"
-          ENVIRONMENT: "production"
-          TYPEORM_CONNECTION: $TYPEORM_CONNECTION
-          TYPEORM_HOST: $TYPEORM_HOST
-          TYPEORM_USERNAME: $TYPEORM_USERNAME
-          TYPEORM_PASSWORD: $TYPEORM_PASSWORD
-          TYPEORM_DATABASE: $TYPEORM_DATABASE
-          TYPEORM_PORT: $TYPEORM_PORT
-          TYPEORM_ENTITIES: $TYPEORM_ENTITIES
+        
     steps:
       - checkout
       # Add ssh keys with fingerprint
       - add_ssh_keys:
           fingerprints: ["bd:0c:36:19:74:1b:58:5c:14:93:ac:73:cc:d0:4a:17"]
       - attach_workspace:
-          at: ~/
+          at: ./
       - run:
           name: Install dependencies
           command: |
-            apk add curl
-            apk add --upgrade bash
+            pwd
+            ls -al
+            cat .circleci/ansible/inventory.txt
             apk add --update ansible
-            apk add openssh-client
-            pip3 install awscli
+            apk add openssh
+            apk add curl
       - run:
           name: Configure Server
           command: |
-            cat ~/project/.circleci/ansible/inventory.txt
-            export ANSIBLE_HOST_KEY_CHECKING=False
-            ansible-playbook -i ~/project/.circleci/ansible/inventory.txt ~/project/.circleci/ansible/configure-server.yml
+            cd .circleci/ansible
+            ansible-playbook -i inventory.txt configure-server.yml
+      - install_awscli
             
       # Here's where you will add some code to rollback on failure
       - destroy-environment:
@@ -315,25 +307,19 @@ jobs:
     environment:
       - ANSIBLE_HOST_KEY_CHECKING: False
     docker:
-      - image: cimg/base:stable
+       - image: python:3.7-alpine3.11
         
     steps:
       - checkout
-      - install_awscli
-      - install_ansible
-      - install_nodejs
-      
+    
       - add_ssh_keys:
           fingerprints: ["bd:0c:36:19:74:1b:58:5c:14:93:ac:73:cc:d0:4a:17"]
       - attach_workspace:
-          at: ~/
-      - restore_cache:
-          keys: [backend-build]
+          at: ./
       - run:
           name: Install dependencies
           command: |
-            cd backend
-            npm install
+            apk add --update ansible nodejs npm openssh tar gzip
       - run:
           name: Deploy Backend
           command: |
