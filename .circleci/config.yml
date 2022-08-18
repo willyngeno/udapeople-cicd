@@ -217,6 +217,7 @@ jobs:
         
     steps:
       - checkout
+      - install_awscli
       # Add ssh keys with fingerprint
       - add_ssh_keys:
           fingerprints: ["bd:0c:36:19:74:1b:58:5c:14:93:ac:73:cc:d0:4a:17"]
@@ -236,7 +237,7 @@ jobs:
           command: |
             cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml
-      - install_awscli
+    
             
       # Here's where you will add some code to rollback on failure
       - destroy-environment:
@@ -307,11 +308,9 @@ jobs:
     environment:
       - ANSIBLE_HOST_KEY_CHECKING: False
     docker:
-       - image: python:3.7-alpine3.11
-        
+       - image: python:3.7-alpine3.11  
     steps:
       - checkout
-    
       - add_ssh_keys:
           fingerprints: ["bd:0c:36:19:74:1b:58:5c:14:93:ac:73:cc:d0:4a:17"]
       - attach_workspace:
