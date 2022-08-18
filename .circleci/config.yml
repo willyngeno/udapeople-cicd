@@ -333,8 +333,6 @@ jobs:
       - image: cimg/base:stable
     steps:
       - checkout
-      - install_awscli
-      - install_nodejs
       - run:
           name: Backend smoke test.
           command: |
@@ -362,11 +360,13 @@ jobs:
 
   cloudfront-update:
     docker:
-      - image: cimg/base:stable
+      - image: amazon/aws-cli
     steps:
       - checkout
-      - install_awscli
-      - install_nodejs
+      - run:
+          name: Install dependencies
+          command: |
+            yum -y install tar gzip
       - run:
           name: Save Old Workflow ID to kvdb.io
           command: |
