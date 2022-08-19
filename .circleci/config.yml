@@ -1,12 +1,27 @@
 version: 2.1
 
-parameters:
-  Workflow_ID:
-    type: string
-    default: ${CIRCLE_WORKFLOW_ID:0:7}
-  
+
+orbs:
+  slack: circleci/slack@4.10.1
 
 commands:
+    destroy-environment:
+      description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
+      parameters:
+      # Add parameter here
+        Workflow_ID:
+          type: string
+         
+      steps:
+        - run:
+            name: Destroy environments
+            when: on_fail
+            command: |
+              aws s3 rm "s3://udapeople-<< parameters.Workflow_ID >>" --recursive
+              aws s3 rb "s3://udapeople-<< parameters.Workflow_ID >>"
+              aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.Workflow_ID >>
+              aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.Workflow_ID >>
+
   
     install_awscli:
       description: Install AWS CLI v2
@@ -14,38 +29,18 @@ commands:
         - run:
             name: Install AWS CLI v2
             command: |
-              
               curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
               unzip awscliv2.zip
               ./aws/install
             when: on_fail
 
     
-    
-    destroy-environment:
-      description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
-      parameters:
-      # Add parameter here
-        Workflow_ID:
-          type: string
-          default: ${CIRCLE_WORKFLOW_ID:0:7}
-      steps:
-        - run:
-            name: Destroy environments
-            when: on_fail
-            command: |
-
-              aws cloudformation delete-stack --stack-name udapeople-backend-<<parameters.Workflow_ID>>
-              aws s3 rm s3://udapeople-<<parameters.Workflow_ID>> --recursive
-              aws cloudformation delete-stack --stack-name udapeople-frontend-<<parameters.Workflow_ID>>
-              aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.Workflow_ID >>
-
     revert-migrations:
       description: Revert the last migration if successfully run in the current workflow.
       parameters:
         Workflow_ID:
           type: string
-          default: ${CIRCLE_WORKFLOW_ID:0:7}   
+          
       steps:
         - run:
             name: Revert migrations
@@ -135,11 +130,10 @@ jobs:
       - run:
           name: Analyse frontend
           command: |
-             cd frontend
-             npm install
-
-              npm audit fix --force  --audit-level=critical
-              npm audit --audit-level=critical
+            cd frontend
+            npm install
+            npm audit fix --force  --audit-level=critical
+            npm audit --audit-level=critical
 
   scan-backend:
     docker:
@@ -151,12 +145,11 @@ jobs:
       - run:
           name: Analyse backend
           command: |
-             cd backend
-             npm install
-
-              npm audit fix --force  --audit-level=critical
-              npm audit fix --force  --audit-level=critical
-              npm audit --audit-level=critical        
+            cd backend
+            npm install
+            npm audit fix --force  --audit-level=critical
+            npm audit fix --force  --audit-level=critical
+            npm audit --audit-level=critical        
   
   deploy-infrastructure:
     docker:
@@ -169,42 +162,42 @@ jobs:
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
-              --tags project=udapeople \
-              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
+              --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
+              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7} \
+              --tags project=udapeople-backend
       - run:
           name: Ensure front-end infrastructure exist
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
-              --tags project=udapeople \
-              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
+              --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7} \
+              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7} \
+              --tags project=udapeople-frontend
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
-              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+            aws ec2 describe-instances \
+              --filters "Name=tag:Name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+                'Name=instance-state-name,Values=running' \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --output text)
-            echo $BACKEND_PUBLIC_IP >> .circleci/ansible/inventory.txt
-            cat .circleci/ansible/inventory.txt
+              --output text >> .circleci/ansible/inventory.txt
+            
       - persist_to_workspace:
           root: .
           paths:
             - ./.circleci/ansible/inventory.txt
       - destroy-environment:
-          Workflow_ID: ${CIRCLE_WORKFLOW_ID:0:5}
+          Workflow_ID: ${CIRCLE_WORKFLOW_ID:0:7}
 
   configure-infrastructure:
     environment:
       - ANSIBLE_HOST_KEY_CHECKING: False
+
     docker:
       - image: python:3.7-alpine3.11
         
     steps:
       - checkout
-     
       # Add ssh keys with fingerprint
       - add_ssh_keys:
           fingerprints: ["bd:0c:36:19:74:1b:58:5c:14:93:ac:73:cc:d0:4a:17"]
@@ -306,8 +299,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            cd backend
-            npm install
+            apk add --update ansible nodejs npm openssh tar gzip
       - run:
           name: Deploy Backend
           command: |
