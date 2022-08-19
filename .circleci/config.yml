@@ -323,18 +323,29 @@ jobs:
       
   smoke-test:
     docker:
-      - image: cimg/base:stable
+      - image: python:3.10.5-alpine3.16
     steps:
       - checkout
       - run:
+          name: Install dependencies
+          command: |
+            apk add --update --no-cache curl aws-cli tar gzip jq
+      - run:
           name: Backend smoke test.
           command: |
-            BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
-              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+            export BACKEND_IP=$(aws ec2 describe-instances \
+              --filters "Name=tag:Name,Values=udaPeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+                'Name=instance-state-name,Values=running' \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
-            echo "API_URL=http://${BACKEND_PUBLIC_IP}:3030" >> frontend/.env
-            cat frontend/.env
+            export API_URL="http://${BACKEND_IP}:3030/api/status"
+            echo "${API_URL}"
+            if curl -s -v --connect-timeout 30 --retry-connrefused 5 "${API_URL}" | grep "ok"
+            then 
+              return 0
+            else 
+              return 1
+            fi
     
       - run:
           name: Frontend smoke test.
