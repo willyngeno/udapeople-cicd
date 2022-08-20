@@ -332,7 +332,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update --no-cache curl aws-cli tar gzip jq
+            apk add --update --no-cache curl awscli tar gzip jq
       - run:
           name: Backend smoke test.
           command: |
