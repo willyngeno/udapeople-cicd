@@ -290,7 +290,7 @@ jobs:
     environment:
       - ANSIBLE_HOST_KEY_CHECKING: False
     docker:
-      - image: cimg/base:stable
+      - image: python:3.7-alpine3.11
     steps:
       - checkout
       - add_ssh_keys:
@@ -301,6 +301,8 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update ansible nodejs npm openssh tar gzip
+            apk add curl
+            pip3 install awscli
       - run:
           name: Deploy Backend
           command: |
