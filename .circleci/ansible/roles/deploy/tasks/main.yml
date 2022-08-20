@@ -1,34 +1,28 @@
 ---
-- name: extract artifact
-  become: yes
-  unarchive:
-    src: files/artifact.tar.gz
-    dest: .
 
-- name: load environment variables
-  become_method: sudo
-  become_user: root
-  become: yes
-  shell: |
-    ls -al
-    echo "NODE_ENV=production" >> .env
-    echo "ENVIRONMENT=production" >> .env
-    echo "TYPEORM_CONNECTION={{ lookup('env', 'TYPEORM_CONNECTION')}}" >> .env
-    echo "TYPEORM_ENTITIES={{ lookup('env', 'TYPEORM_ENTITIES')}}" >> .env
-    echo "TYPEORM_HOST={{ lookup('env', 'TYPEORM_HOST')}}" >> .env
-    echo "TYPEORM_PORT={{ lookup('env', 'TYPEORM_PORT')}}" >> .env
-    echo "TYPEORM_USERNAME={{ lookup('env', 'TYPEORM_USERNAME')}}" >> .env
-    echo "TYPEORM_PASSWORD={{ lookup('env', 'TYPEORM_PASSWORD')}}" >> .env
-    echo "TYPEORM_DATABASE={{ lookup('env', 'TYPEORM_DATABASE')}}" >> .env
-    echo "TYPEORM_MIGRATIONS={{ lookup('env', 'TYPEORM_MIGRATIONS')}}" >> .env
-    echo "TYPEORM_MIGRATIONS_DIR={{ lookup('env', 'TYPEORM_MIGRATIONS_DIR')}}" >> .env
+- name: Creating directory for backend
+  file:
+    path: /home/ubuntu/app
+    state: directory
+
+- name: Extract and add Artifacts to EC2 instance
+  unarchive:
+    src: /home/circleci/project/artifact.tar.gz
+    dest: /home/ubuntu/app
     
-- name: start server
-  become: yes
-  become_method: sudo
-  become_user: root 
+- name: install dependencies
+  become: true
   shell: |
+    cd /home/ubuntu/app
+    npm install
+- name: Start node server daemon with pm2
+  become: true
+  shell: |
+    cd /home/ubuntu/app
     npm install
     pm2 stop default
     pm2 start npm -- start
-    pm2 start dist/main.js --name node-app
+  register: starting_server
+
+- debug:
+    msg: "{{ starting_server.stdout_lines }}"
