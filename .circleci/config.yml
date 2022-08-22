@@ -209,11 +209,12 @@ jobs:
     steps:
       - checkout
    
-      - install_ansible
+      
       - add_ssh_keys:
           fingerprints: ["d9:06:93:7c:dd:ac:25:bf:3d:f3:10:f5:5d:69:f6:67"]
       - attach_workspace:
           at: ~/
+      - install_ansible
       - run:
           name: Configure Server
           command: |
