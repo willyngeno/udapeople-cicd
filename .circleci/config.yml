@@ -5,11 +5,22 @@ orbs:
   slack: circleci/slack@4.10.1
 
 commands:
+  install_ansible:
+    description: Install Ansible
+    steps:
+      - run:
+          name: Install Ansible
+          command: |
+            sudo apt update
+            sudo apt install software-properties-common -y
+            sudo add-apt-repository --yes --update ppa:ansible/ansible
+            sudo apt install ansible -y
     destroy-environment:
       description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
       parameters:
       # Add parameter here
         Workflow_ID:
+          default: "${CIRCLE_WORKFLOW_ID:0:7}"
           type: string
          
       steps:
@@ -19,8 +30,8 @@ commands:
             command: |
               aws s3 rm "s3://udapeople-<< parameters.Workflow_ID >>" --recursive
               aws s3 rb "s3://udapeople-<< parameters.Workflow_ID >>"
-              aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.Workflow_ID >>
-              aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.Workflow_ID >>
+              aws cloudformation delete-stack --stack-name "udapeople-frontend-<< parameters.Workflow_ID >>"
+              aws cloudformation delete-stack --stack-name "udapeople-backend-<< parameters.Workflow_ID >>"
 
   
     install_awscli:
@@ -193,39 +204,26 @@ jobs:
           Workflow_ID: ${CIRCLE_WORKFLOW_ID:0:7}
 
   configure-infrastructure:
-    environment:
-      - ANSIBLE_HOST_KEY_CHECKING: False
-
     docker:
-      - image: python:3.7-alpine3.11
-        
+      - image: cimg/base:stable
     steps:
       - checkout
-      # Add ssh keys with fingerprint
+   
+      - install_ansible
       - add_ssh_keys:
-          fingerprints: ["bd:0c:36:19:74:1b:58:5c:14:93:ac:73:cc:d0:4a:17"]
+          fingerprints: ["d9:06:93:7c:dd:ac:25:bf:3d:f3:10:f5:5d:69:f6:67"]
       - attach_workspace:
-          at: ./
-      - run:
-          name: Install dependencies
-          command: |
-            pwd
-            ls -al
-            cat .circleci/ansible/inventory.txt
-            apk add --update ansible
-            apk add openssh
-            apk add curl
+          at: ~/
       - run:
           name: Configure Server
           command: |
             cd .circleci/ansible
+            cat inventory.txt
             ansible-playbook -i inventory.txt configure-server.yml
-      - install_awscli
             
       # Here's where you will add some code to rollback on failure
-      - destroy-environment:
-          Workflow_ID: ${CIRCLE_WORKFLOW_ID:0:7}
-      
+      - destroy-environment
+          
   run-migrations:
     docker:
       - image: sleavely/node-awscli:14.x
