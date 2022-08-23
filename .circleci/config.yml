@@ -169,10 +169,10 @@ jobs:
   
   deploy-infrastructure:
     docker:
-      - image: cimg/base:stable
+      - image: amazon/aws-cli
     steps:
       - checkout
-      - install_awscli
+      - run: yum install -y tar gzip jq
       - run:
           name: Ensure back-end infrastructure exists
           command: |
@@ -209,16 +209,26 @@ jobs:
         
 
   configure-infrastructure:
+    environment:
+      - ANSIBLE_HOST_KEY_CHECKING: False
     docker:
-      - image: cimg/base:stable
+      - image: python:3.7-alpine3.11
     steps:
       - checkout
-      - install_ansible
-      - install_awscli  
+      - install_awscli
       - add_ssh_keys:
           fingerprints: ["bd:0c:36:19:74:1b:58:5c:14:93:ac:73:cc:d0:4a:17"]
       - attach_workspace:
-          at: ~/
+          at: ./
+      - run:
+          name: Install dependencies
+          command: |
+            pwd
+            ls -al
+            cat .circleci/ansible/inventory.txt
+            apk add --update ansible
+            apk add openssh
+            apk add curl
       - run:
           name: Configure Server
           command: |
