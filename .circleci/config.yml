@@ -259,13 +259,13 @@ jobs:
       - image: cimg/base:stable
     steps:
       - checkout
+      - install_nodejs
+      - install_awscli
+      - install_ansible
       - add_ssh_keys:
           fingerprints: ["d9:06:93:7c:dd:ac:25:bf:3d:f3:10:f5:5d:69:f6:67"]
       - attach_workspace:
           at: ~/
-      - install_nodejs
-      - install_awscli
-      - install_ansible
       - run:
           name: Get backend url
           command: |
@@ -287,6 +287,7 @@ jobs:
             npm install
             npm run build
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+            
       - destroy-environment   
       - revert-migrations
         
