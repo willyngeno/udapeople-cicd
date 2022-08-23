@@ -1,34 +1,32 @@
 ---
-- name: extract artifact
-  become: yes
-  unarchive:
-    src: files/artifact.tar.gz
-    dest: .
+- name: "Creates backend app directory"
+  file:
+    path: ~/backend-app
+    state: directory
 
-- name: load environment variables
-  become_method: sudo
-  become_user: root
-  become: yes
+- name: "Unarchive backend files"
+  unarchive:
+    src: artifact.tar.gz
+    dest: ~/backend-app
+
+- name: "Installing Node Dependencies"
   shell: |
-    ls -al
-    echo "NODE_ENV=production" >> .env
-    echo "ENVIRONMENT=production" >> .env
-    echo "TYPEORM_CONNECTION={{ lookup('env', 'TYPEORM_CONNECTION')}}" >> .env
-    echo "TYPEORM_ENTITIES={{ lookup('env', 'TYPEORM_ENTITIES')}}" >> .env
-    echo "TYPEORM_HOST={{ lookup('env', 'TYPEORM_HOST')}}" >> .env
-    echo "TYPEORM_PORT={{ lookup('env', 'TYPEORM_PORT')}}" >> .env
-    echo "TYPEORM_USERNAME={{ lookup('env', 'TYPEORM_USERNAME')}}" >> .env
-    echo "TYPEORM_PASSWORD={{ lookup('env', 'TYPEORM_PASSWORD')}}" >> .env
-    echo "TYPEORM_DATABASE={{ lookup('env', 'TYPEORM_DATABASE')}}" >> .env
-    echo "TYPEORM_MIGRATIONS={{ lookup('env', 'TYPEORM_MIGRATIONS')}}" >> .env
-    echo "TYPEORM_MIGRATIONS_DIR={{ lookup('env', 'TYPEORM_MIGRATIONS_DIR')}}" >> .env
+    cd ~/backend-app
+    npm i
+- name: "Executing Node app with PM2"
+  shell: |
+    cd ~/backend-app/dist
     
-- name: start server
-  become: yes
-  become_method: sudo
-  become_user: root 
-  shell: |
+    cd ../
     npm install
-    pm2 stop default
-    pm2 start npm -- start
-    pm2 start dist/main.js --name node-app
+    npm run build
+  register: execute_node
+
+- name: print message
+  debug:
+    msg: "{{ execute_node.stdout_lines }}"
+
+- name: "Configure pm2 to start as service"
+  become: true
+  shell: |
+    env PATH=$PATH:/usr/local/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu
