@@ -21,7 +21,7 @@ commands:
             command: |
               curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
               unzip awscliv2.zip
-              ./aws/install
+              sudo ./aws/install
             when: on_fail
 
     install_ansible:
@@ -258,20 +258,22 @@ jobs:
       - image: cimg/base:stable
     steps:
       - checkout
-      - install_nodejs
-      - install_awscli
+      
       - add_ssh_keys:
           fingerprints: ["d9:06:93:7c:dd:ac:25:bf:3d:f3:10:f5:5d:69:f6:67"]
       - attach_workspace:
           at: ~/
+
+      - install_awscli
+      - install_ansible
+      - install_nodejs
       - run:
           name: Get backend url
           command: |
             export BACKEND_IP=$(aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --filters Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7} \
-            --output text
-            )
+            --output text)
             export API_URL="http://${BACKEND_IP}:3030"
             echo "API_URL = ${API_URL}"
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
