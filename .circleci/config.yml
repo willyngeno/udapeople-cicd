@@ -6,13 +6,13 @@ orbs:
 
 commands:
     install_nodejs:
-    description: Install Node.js 13
-    steps:
-      - run:
-          name: Install Node.js 13
-          command: |
-            curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
-            sudo apt install -y nodejs
+      description: Install Node.js 13
+      steps:
+        - run:
+            name: Install Node.js 13
+            command: |
+              curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+              sudo apt install -y nodejs
     install_awscli:
       description: Install AWS CLI v2
       steps:
