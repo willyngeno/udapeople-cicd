@@ -21,7 +21,8 @@ commands:
             command: |
               curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
               unzip awscliv2.zip
-              sudo ./aws/install
+              ./aws/install
+            when: on_fail
             
     install_ansible:
       description: Install Ansible
@@ -262,16 +263,18 @@ jobs:
       - revert-migrations
   deploy-frontend:
     docker:
-      - image: cimg/base:stable
+      - image: python:3.7-alpine3.11
     steps:
       - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update nodejs npm tar gzip jq curl
+            pip3 install awscli
       - add_ssh_keys:
           fingerprints: ["bd:0c:36:19:74:1b:58:5c:14:93:ac:73:cc:d0:4a:17"]
       - attach_workspace:
-          at: ~/
-      - install_nodejs
-      - install_awscli
-      - install_ansible
+          at: ./
       - run:
           name: Get backend url
           command: |
@@ -299,17 +302,20 @@ jobs:
       # Here's where you will add some code to rollback on failure      
                     
   deploy-backend:
+    environment:
+      - ANSIBLE_HOST_KEY_CHECKING: False
     docker:
-      - image: cimg/base:stable
+      - image: python:3.7-alpine3.11
     steps:
       - checkout
       - add_ssh_keys:
           fingerprints: ["bd:0c:36:19:74:1b:58:5c:14:93:ac:73:cc:d0:4a:17"]
       - attach_workspace:
-          at: ~/
-      - install_nodejs
-      - install_awscli
-      - install_ansible
+          at: ./
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update ansible nodejs npm openssh tar gzip
       - run:
           name: Deploy Backend
           command: |
@@ -334,12 +340,13 @@ jobs:
       
   smoke-test:
     docker:
-      - image: cimg/base:stable
+      - image: python:3.10.5-alpine3.16
     steps:
       - checkout
-
-      - install_awscli
-      - install_nodejs
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update --no-cache curl aws-cli tar gzip jq
       - run:
           name: Backend smoke test.
           command: |
