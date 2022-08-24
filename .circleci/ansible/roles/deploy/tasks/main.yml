@@ -16,11 +16,15 @@
 - name: "Executing Node app with PM2"
   shell: |
     cd ~/backend-app/dist
-    
-    cd ../
-    npm install
-    npm run build
+    pm2 stop default
+    pm2 start main.js
+  register: execute_node
 
-    sudo npm  install  forever -g
-    sudo npm  install  ts-node -g
-    forever  start  -c "ts-node -r tsconfig-paths/register -r dotenv/config src/main.ts" ./
+- name: print message
+  debug:
+    msg: "{{ execute_node.stdout_lines }}"
+
+- name: "Configure pm2 to start as service"
+  become: true
+  shell: |
+    env PATH=$PATH:/usr/local/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu
